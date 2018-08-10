@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    >
+
+
+    <EditText
+        android:id="@+id/speech_to_text_result"
+        android:layout_width="308dp"
+        android:layout_height="121dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="252dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:hint="wait"
+        android:inputType="textMultiLine"
+        android:text=""
+        android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+        <Button
+        android:theme="@style/MyButton"
+         style="@style/Widget.AppCompat.Button.Colored"
+        android:id="@+id/browse_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="8dp"
+
+        android:text="Browse"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.128"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/speech_to_text_result"
+        app:layout_constraintVertical_bias="0.808" />
+
+    <Button
+        android:theme="@style/MyButton"
+         style="@style/Widget.AppCompat.Button.Colored"
+        android:id="@+id/talk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="148dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+
+
+        android:text="talk"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.87"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/speech_to_text_result"
+        app:layout_constraintVertical_bias="0.819" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+
+        <com.jaredrummler.materialspinner.MaterialSpinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:ms_background_color="#008B8B"
+            app:ms_text_color="#ffffff"
+            />
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>
