@@ -1,6 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/INDEX.LIST'
+        exclude("META-INF/*.kotlin_module")
+    }
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.example.sk.exp"
@@ -38,9 +50,10 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     //Google Cloud Speech
-    implementation 'com.google.api-client:google-api-client-android:1.22.0'
-    implementation 'com.google.apis:google-api-services-speech:v1beta1-rev336-1.22.0'
-    implementation 'com.google.apis:google-api-services-language:v1beta2-rev6-1.22.0'
+    implementation 'com.google.cloud:google-cloud-speech:1.24.10'
+   // implementation 'com.google.api-client:google-api-client-android:1.22.0'
+//    implementation 'com.google.apis:google-api-services-speech:v1beta1-rev336-1.22.0'
+//    implementation 'com.google.apis:google-api-services-language:v1beta2-rev6-1.22.0'
     implementation 'com.google.code.findbugs:jsr305:2.0.1'
 
     implementation project(':commons-io-2.6')//IO File Library
