@@ -5,21 +5,20 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.EditText;
-import com.google.cloud.speech.v1.RecognitionAudio;
-import com.google.cloud.speech.v1.RecognitionConfig;
-import com.google.cloud.speech.v1.RecognizeRequest;
-import com.google.cloud.speech.v1.RecognizeResponse;
-import com.google.cloud.speech.v1.SpeechClient;
-import com.google.cloud.speech.v1.SpeechRecognitionAlternative;
-import com.google.cloud.speech.v1.SpeechRecognitionResult;
-import com.google.protobuf.ByteString;
 
-import org.apache.commons.codec.binary.Base64;
-
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import com.google.api.services.speech.v1beta1.Speech;
+import com.google.api.services.speech.v1beta1.SpeechRequestInitializer;
+import com.google.api.services.speech.v1beta1.model.RecognitionAudio;
+import com.google.api.services.speech.v1beta1.model.RecognitionConfig;
+import com.google.api.services.speech.v1beta1.model.SpeechRecognitionResult;
+import com.google.api.services.speech.v1beta1.model.SyncRecognizeRequest;
+import com.google.api.services.speech.v1beta1.model.SyncRecognizeResponse;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import java.io.FileNotFoundException;
@@ -31,7 +30,7 @@ import static com.google.common.io.ByteStreams.toByteArray;
 
 
 public class MainActivity extends AppCompatActivity {
-    private final String CLOUD_API_KEY = "AIzaSyCxTR4FIrH8WTef1xcKCYgx8mAsJ399bsk";
+    private final String CLOUD_API_KEY = "API KEY HERE";
     String opt;//option for language
     Button button;// talk->record intent
     @Override
@@ -67,14 +66,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
         super.onActivityResult(requestCode, resultCode, data);
-        final Uri soundUri = data.getData();
-     //   sampleRecognize(soundUri);
         if(resultCode == RESULT_OK) {
-       //     final Uri soundUri = data.getData(); //audio data
-            try (SpeechClient speechClient = SpeechClient.create()) {
+            final Uri soundUri = data.getData(); //audio data
 
             AsyncTask.execute(() -> {
                 InputStream stream = null;
@@ -110,108 +104,53 @@ public class MainActivity extends AppCompatActivity {
                 player.start();
 
 // Release the player
+                player.setOnCompletionListener(
+                        MediaPlayer::release);
+                Speech speechService = new Speech.Builder(
+                        AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(),
+                        null
+                ).setSpeechRequestInitializer(
+                        new SpeechRequestInitializer(CLOUD_API_KEY))
+                        .build();
+                RecognitionConfig recognitionConfig = new RecognitionConfig();
+                recognitionConfig.setLanguageCode(opt);
+                RecognitionAudio recognitionAudio = new RecognitionAudio();
+                recognitionAudio.setContent(base64EncodedData);
 
-
-                RecognitionConfig.AudioEncoding encoding = RecognitionConfig.AudioEncoding.LINEAR16;
-                RecognitionConfig config =
-                        RecognitionConfig.newBuilder()
-                                .setLanguageCode(opt)
-                                .setSampleRateHertz(16000)
-                                .setEncoding(encoding)
-                                .build();
-                ByteString content = ByteString.copyFrom(audioData);
-                RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(content).build();
-                RecognizeRequest request =
-                        RecognizeRequest.newBuilder().setConfig(config).setAudio(audio).build();
-                RecognizeResponse response = speechClient.recognize(request);
                 // Create request
-//                SyncRecognizeRequest request = new SyncRecognizeRequest();
-//                request.setConfig(recognitionConfig);
-//                request.setAudio(recognitionAudio);
+                SyncRecognizeRequest request = new SyncRecognizeRequest();
+                request.setConfig(recognitionConfig);
+                request.setAudio(recognitionAudio);
 
 // Generate response
-//                SyncRecognizeResponse response = null;
-//                try {
-//                    response = speechService.speech()
-//                            .syncrecognize(request)
-//                            .execute();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
-
-                for (SpeechRecognitionResult result : response.getResultsList()) {
-                    // First alternative is the most probable result
-                    SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-                    String finalTranscript  = alternative.getTranscript();
-                    runOnUiThread(() -> {
-                        EditText speechToTextResult =
-                                findViewById(R.id.speech_to_text_result);
-                        speechToTextResult.setText(finalTranscript);
-                    });
-                    break;
+                SyncRecognizeResponse response = null;
+                try {
+                    response = speechService.speech()
+                            .syncrecognize(request)
+                            .execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
+// Extract transcript
+                SpeechRecognitionResult result = response.getResults().get(0);
+                final String transcript = result.getAlternatives().get(0)
+                        .getTranscript();
 
+                runOnUiThread(() -> {
+                    EditText speechToTextResult =
+                            findViewById(R.id.speech_to_text_result);
+                    speechToTextResult.setText(transcript);
+                });
             });
 
-            } catch (Exception exception) {
-                System.err.println("Failed to create the client due to: " + exception);
-            }
+
                 }
 
 }
 
-    public  void sampleRecognize(Uri soundUri) {
-        try (SpeechClient speechClient = SpeechClient.create()) {
 
-            // The language of the supplied audio
-            String languageCode = "en-US";
-
-            // Sample rate in Hertz of the audio data sent
-            int sampleRateHertz = 16000;
-
-            // Encoding of audio data sent. This sample sets this explicitly.
-            // This field is optional for FLAC and WAV audio formats.
-            RecognitionConfig.AudioEncoding encoding = RecognitionConfig.AudioEncoding.LINEAR16;
-            RecognitionConfig config =
-                    RecognitionConfig.newBuilder()
-                            .setLanguageCode(languageCode)
-                            .setSampleRateHertz(sampleRateHertz)
-                            .setEncoding(encoding)
-                            .build();
-            InputStream stream = null;
-            try {
-                stream = getContentResolver() //stream of audio
-                        .openInputStream(soundUri);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            byte[] audioData = new byte[0]; //byte format of audio
-            try {
-                audioData = toByteArray(stream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                stream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ByteString content = ByteString.copyFrom(audioData);
-            RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(content).build();
-            RecognizeRequest request =
-                    RecognizeRequest.newBuilder().setConfig(config).setAudio(audio).build();
-            RecognizeResponse response = speechClient.recognize(request);
-            for (SpeechRecognitionResult result : response.getResultsList()) {
-                // First alternative is the most probable result
-                SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-                System.out.printf("Transcript: %s\n", alternative.getTranscript());
-            }
-        } catch (Exception exception) {
-            System.err.println("Failed to create the client due to: " + exception);
-        }
-    }
 
 
         }
